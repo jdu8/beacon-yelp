@@ -9,10 +9,11 @@ build/
 
 # Environment
 .env
+gcp-key.json
 
 # Data — never commit
+data/
 *.csv
-*.json
 *.npy
 *.pt
 

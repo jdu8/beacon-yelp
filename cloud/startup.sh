@@ -1,21 +1,21 @@
 #!/bin/bash
-# Runs on Lambda Labs VM at job start
-# Pulls data from GCP bucket, trains, pushes results back
-
 set -e
 
-# Auth GCP from service account key
+echo "=== Beacon startup ==="
+
+# Auth GCP
 gcloud auth activate-service-account --key-file=/workspace/gcp-key.json
 
 # Pull data from bucket to local NVMe
+echo "Pulling data from GCP bucket..."
 mkdir -p /data
 gsutil -m cp -r gs://${GCS_BUCKET}/data/ /data/
 
 # Pull latest code
+echo "Pulling latest code..."
 git pull origin main
 
-# Run training — args passed from launch script
-python scripts/train.py "$@"
+# Install package
+pip install -e .
 
-# Push results back to bucket
-gsutil -m cp -r /outputs/ gs://${GCS_BUCKET}/outputs/
+echo "=== Startup complete ==="

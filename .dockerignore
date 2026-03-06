@@ -11,6 +11,6 @@ tests/
 .idea/
 venv/
 *.csv
-*.json
 *.npy
 *.pt
+gcp-key.json
