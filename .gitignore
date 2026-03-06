@@ -1,0 +1,28 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Environment
+.env
+
+# Data — never commit
+*.csv
+*.json
+*.npy
+*.pt
+
+# Outputs
+outputs/
+wandb/
+
+# IDE
+.vscode/
+.idea/
+.DS_Store
+
+venv/

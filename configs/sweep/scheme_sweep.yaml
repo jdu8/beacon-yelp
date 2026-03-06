@@ -1,0 +1,6 @@
+hydra:
+  mode: MULTIRUN
+  sweeper:
+    params:
+      reweighting: uniform,minmax_soft,minmax_hard,rank,exponential
+      experiment.seed: 42,123,67

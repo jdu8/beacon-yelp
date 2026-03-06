@@ -1,0 +1,8 @@
+hydra:
+  mode: MULTIRUN
+  sweeper:
+    params:
+      data.guide_size: 1000,3000,5000,10000
+      reweighting: uniform,minmax_soft
+      experiment.seed: 42,123,67
+      

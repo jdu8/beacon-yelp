@@ -1,0 +1,3 @@
+name: distilbert-base-uncased
+num_labels: 1
+max_len: 256

@@ -1,0 +1,21 @@
+version: "3.8"
+
+services:
+  beacon:
+    build: .
+    working_dir: /workspace
+    env_file:
+      - .env
+    volumes:
+      - ./data:/data
+      - ./outputs:/outputs
+      - ./beacon:/workspace/beacon
+      - ./scripts:/workspace/scripts
+      - ./configs:/workspace/configs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]

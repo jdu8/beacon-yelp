@@ -1,0 +1,15 @@
+torch
+transformers
+datasets
+scikit-learn
+numpy
+pandas
+hydra-core
+omegaconf
+wandb
+python-dotenv
+tqdm
+pytest
+umap-learn
+matplotlib
+accelerate

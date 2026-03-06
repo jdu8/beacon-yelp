@@ -1,0 +1,3 @@
+scheme: exponential
+k: 50
+temperature: 0.5
