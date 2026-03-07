@@ -1,6 +1,7 @@
 import hydra
 from omegaconf import DictConfig
-
+from dotenv import load_dotenv
+load_dotenv()
 from beacon.utils.seed import set_seed
 from beacon.data.dataset import load_and_sample, sample_test_subset, print_split_summary
 from beacon.models.scorer import load_model, load_tokenizer, get_device_and_dtype, tokenize_dataset

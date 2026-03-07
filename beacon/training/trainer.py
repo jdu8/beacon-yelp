@@ -96,7 +96,7 @@ def train(
         entity  = cfg.wandb.get("entity", None),
         name    = run_name,
         config  = OmegaConf.to_container(cfg, resolve=True),
-        mode    = cfg.wandb.get("mode", "online"),
+        mode    = os.environ.get("WANDB_MODE", cfg.wandb.get("mode", "online")),
     )
 
     # ── Similarity matrix — computed once ────────────────────────────────────
@@ -186,10 +186,9 @@ def train(
 
             # Compute weights
             scheme = cfg.reweighting.scheme
-            kwargs = OmegaConf.to_container(cfg.reweighting, resolve=True)
-            sample_weights = compute_sample_weights(
-                topk_matrix, guide_losses, scheme, **kwargs
-            )
+	    kwargs = OmegaConf.to_container(cfg.reweighting, resolve=True)
+	    kwargs.pop('scheme')  # already passed as positional arg
+	    sample_weights = compute_sample_weights(topk_matrix, guide_losses, scheme, **kwargs)
 
             w_stats = get_weight_stats(sample_weights)
             print(f"  Weights — std:{w_stats['w_std']:.4f} "

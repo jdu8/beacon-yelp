@@ -8,7 +8,7 @@ def load_model(cfg: DictConfig, device: torch.device, dtype: torch.dtype):
         cfg.model.name,
         num_labels=1,
         ignore_mismatched_sizes=True,
-        torch_dtype=dtype,
+        dtype=dtype,
     )
     model = model.to(device)
     return model
