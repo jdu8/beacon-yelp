@@ -22,7 +22,7 @@ def get_device_and_dtype() -> tuple[torch.device, torch.dtype]:
     if torch.cuda.is_available():
         device = torch.device("cuda")
         cap    = torch.cuda.get_device_capability()
-        dtype  = torch.bfloat16 if cap[0] >= 8 else torch.float16
+        dtype  = torch.bfloat16 if cap[0] >= 8 else torch.float32
     else:
         device = torch.device("cpu")
         dtype  = torch.float32
