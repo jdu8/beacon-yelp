@@ -2,6 +2,7 @@ defaults:
   - model: deberta_small
   - training: default
   - data: default
+  - reweighting: uniform
   - _self_
 
 experiment:
@@ -16,4 +17,3 @@ paths:
 wandb:
   project: ${oc.env:WANDB_PROJECT,beacon}
   entity: ${oc.env:WANDB_ENTITY,null}
-  mode: online
