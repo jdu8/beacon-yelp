@@ -1,0 +1,9 @@
+synth_file: synthetic_500k.csv
+synth_emb_file: embeddings_synthetic_500k.npy
+real_train_file: restaurant_train_70k.json
+real_test_file: restaurant_test_30k.json
+real_emb_file: embeddings_base_70k.npy
+synth_size: 30000
+guide_size: 3000
+overlap_pct_low: 90
+overlap_pct_high: 100

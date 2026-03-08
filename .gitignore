@@ -12,7 +12,7 @@ build/
 gcp-key.json
 
 # Data — never commit
-data/
+/data/
 *.csv
 *.npy
 *.pt
