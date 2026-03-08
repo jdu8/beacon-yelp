@@ -1,6 +1,27 @@
+defaults:
+  - /model: deberta_small
+  - /training: default
+  - /data: default
+  - /reweighting: uniform
+  - _self_
+
 hydra:
   mode: MULTIRUN
   sweeper:
     params:
       reweighting: uniform,minmax_soft,minmax_hard,rank,exponential
       experiment.seed: 42,123,67
+
+experiment:
+  name: "???"
+  seed: 42
+  notes: ""
+
+paths:
+  data_dir: ${oc.env:DATA_DIR,/data}
+  output_dir: ${oc.env:OUTPUT_DIR,/outputs}
+
+wandb:
+  project: ${oc.env:WANDB_PROJECT,beacon}
+  entity: ${oc.env:WANDB_ENTITY,null}
+  mode: ${oc.env:WANDB_MODE,online}

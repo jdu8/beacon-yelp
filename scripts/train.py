@@ -1,5 +1,6 @@
 import hydra
-from omegaconf import DictConfig
+from omegaconf import DictConfig, OmegaConf
+from omegaconf.errors import MissingMandatoryValue
 from dotenv import load_dotenv
 load_dotenv()
 from beacon.utils.seed import set_seed
@@ -10,18 +11,19 @@ from hydra.core.hydra_config import HydraConfig
 
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
 def main(cfg: DictConfig) -> None:
-
     from beacon.training.trainer import train
+
+    # ── Auto-generate name if not set ────────────────────────────────────────
+    try:
+        _ = cfg.experiment.name
+    except MissingMandatoryValue:
+        overrides = HydraConfig.get().overrides.task
+        name = "_".join(o.replace("=", "-").replace("/", "-") for o in overrides)
+        OmegaConf.update(cfg, "experiment.name", name)
 
     # ── Seed ─────────────────────────────────────────────────────────────────
     set_seed(cfg.experiment.seed)
-    if cfg.experiment.name == "???":
-        try:
-            _ = cfg.experiment.name    
-        except MissingMandatoryValue:
-            overrides = HydraConfig.get().overrides.task
-            name = "_".join(o.replace("=", "-").replace("/", "-") for o in overrides)
-            OmegaConf.update(cfg, "experiment.name", name)
+
     # ── Device + dtype ────────────────────────────────────────────────────────
     device, dtype = get_device_and_dtype()
 
@@ -47,14 +49,14 @@ def main(cfg: DictConfig) -> None:
     # ── Train ─────────────────────────────────────────────────────────────────
     print("\nStarting training...")
     history = train(
-        cfg        = cfg,
-        model      = model,
-        tokenizer  = tokenizer,
+        cfg          = cfg,
+        model        = model,
+        tokenizer    = tokenizer,
         ds_tokenized = ds_tokenized,
-        train_embs = train_embs,
-        guide_embs = guide_embs,
-        device     = device,
-        dtype      = dtype,
+        train_embs   = train_embs,
+        guide_embs   = guide_embs,
+        device       = device,
+        dtype        = dtype,
     )
 
 

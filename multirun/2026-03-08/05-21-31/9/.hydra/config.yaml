@@ -1,0 +1,33 @@
+model:
+  name: microsoft/deberta-v3-small
+  num_labels: 1
+  max_len: 256
+training:
+  num_epochs: 10
+  patience: 2
+  batch_size: 64
+  learning_rate: 2.0e-05
+  weight_decay: 0.01
+  warmup_ratio: 0.1
+  grad_clip: 1.0
+data:
+  guide_size: 3000
+  synth_size: 30000
+  real_train_file: restaurant_train_70k.json
+  real_test_file: restaurant_test_30k.json
+  synth_file: synthetic_500k.csv
+  synth_emb_file: embeddings_synthetic_500k.npy
+  real_emb_file: embeddings_base_70k.npy
+reweighting:
+  scheme: rank
+  k: 50
+experiment:
+  name: ???
+  seed: 42
+  notes: ''
+paths:
+  data_dir: ${oc.env:DATA_DIR,/data}
+  output_dir: ${oc.env:OUTPUT_DIR,/outputs}
+wandb:
+  project: ${oc.env:WANDB_PROJECT,beacon}
+  entity: ${oc.env:WANDB_ENTITY,null}
