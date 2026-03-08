@@ -186,9 +186,9 @@ def train(
 
             # Compute weights
             scheme = cfg.reweighting.scheme
-	    kwargs = OmegaConf.to_container(cfg.reweighting, resolve=True)
-	    kwargs.pop('scheme')  # already passed as positional arg
-	    sample_weights = compute_sample_weights(topk_matrix, guide_losses, scheme, **kwargs)
+	    	kwargs = OmegaConf.to_container(cfg.reweighting, resolve=True)
+	    	kwargs.pop('scheme')  # already passed as positional arg
+	    	sample_weights = compute_sample_weights(topk_matrix, guide_losses, scheme, **kwargs)
 
             w_stats = get_weight_stats(sample_weights)
             print(f"  Weights — std:{w_stats['w_std']:.4f} "
