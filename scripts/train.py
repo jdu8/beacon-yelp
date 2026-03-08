@@ -16,9 +16,12 @@ def main(cfg: DictConfig) -> None:
     # ── Seed ─────────────────────────────────────────────────────────────────
     set_seed(cfg.experiment.seed)
     if cfg.experiment.name == "???":
-        overrides = HydraConfig.get().overrides.task
-        name = "_".join(o.replace("=", "-").replace("/", "-") for o in overrides)
-        cfg.experiment.name = name
+        try:
+            _ = cfg.experiment.name    
+        except MissingMandatoryValue:
+            overrides = HydraConfig.get().overrides.task
+            name = "_".join(o.replace("=", "-").replace("/", "-") for o in overrides)
+            OmegaConf.update(cfg, "experiment.name", name)
     # ── Device + dtype ────────────────────────────────────────────────────────
     device, dtype = get_device_and_dtype()
 
