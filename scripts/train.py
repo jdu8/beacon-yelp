@@ -5,6 +5,7 @@ load_dotenv()
 from beacon.utils.seed import set_seed
 from beacon.data.dataset import load_and_sample, sample_test_subset, print_split_summary
 from beacon.models.scorer import load_model, load_tokenizer, get_device_and_dtype, tokenize_dataset
+from hydra.core.hydra_config import HydraConfig
 
 
 @hydra.main(version_base=None, config_path="../configs", config_name="config")
@@ -14,7 +15,10 @@ def main(cfg: DictConfig) -> None:
 
     # ── Seed ─────────────────────────────────────────────────────────────────
     set_seed(cfg.experiment.seed)
-
+    if cfg.experiment.name == "???":
+        overrides = HydraConfig.get().overrides.task
+        name = "_".join(o.replace("=", "-").replace("/", "-") for o in overrides)
+        cfg.experiment.name = name
     # ── Device + dtype ────────────────────────────────────────────────────────
     device, dtype = get_device_and_dtype()
 
