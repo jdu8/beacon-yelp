@@ -3,7 +3,11 @@ Weight ablation: baseline vs sampler-weighted vs loss-weighted (3 ranges).
 5 runs total, all using data=test_50k (50k synth, 5k guide).
 
 Usage:
+    python scripts/run_weight_ablation.py [extra hydra overrides...]
+
+Examples:
     python scripts/run_weight_ablation.py
+    python scripts/run_weight_ablation.py model=distilbert training.batch_size=128 training.learning_rate=3e-5
 """
 
 import subprocess
@@ -59,13 +63,17 @@ RUNS = [
 
 
 def main():
+    extra_overrides = sys.argv[1:]
+    if extra_overrides:
+        print(f"Extra overrides: {extra_overrides}")
+
     results = {}
     for i, run in enumerate(RUNS):
         print(f"\n{'='*60}")
         print(f"  RUN {i+1}/{len(RUNS)}: {run['name']}")
         print(f"{'='*60}\n")
 
-        cmd = [sys.executable, "scripts/train.py"] + run["overrides"]
+        cmd = [sys.executable, "scripts/train.py"] + run["overrides"] + extra_overrides
         proc = subprocess.run(cmd, cwd=".")
         if proc.returncode != 0:
             print(f"  FAILED: {run['name']} (exit code {proc.returncode})")
