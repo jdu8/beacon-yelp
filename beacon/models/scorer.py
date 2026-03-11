@@ -43,6 +43,20 @@ def tokenize_dataset(ds, tokenizer, cfg: DictConfig):
             max_length=cfg.model.max_len,
         )
 
+    # Add sample indices to train split for loss-weighted mode
+    if "train" in ds:
+        ds["train"] = ds["train"].add_column("sample_idx", list(range(len(ds["train"]))))
+
     ds_tokenized = ds.map(tokenize, batched=True, remove_columns=["text"])
-    ds_tokenized.set_format("torch", columns=["input_ids", "attention_mask", "label"])
+
+    torch_cols = ["input_ids", "attention_mask", "label"]
+    if "sample_idx" in ds_tokenized["train"].column_names:
+        torch_cols_train = torch_cols + ["sample_idx"]
+    else:
+        torch_cols_train = torch_cols
+
+    for split in ds_tokenized:
+        cols = torch_cols_train if split == "train" else torch_cols
+        ds_tokenized[split].set_format("torch", columns=cols)
+
     return ds_tokenized

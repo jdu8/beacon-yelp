@@ -75,16 +75,24 @@ def train(cfg, model, tokenizer, ds_tokenized, train_embs, guide_embs, device, d
         mode=os.environ.get("WANDB_MODE", cfg.wandb.get("mode", "online")),
     )
 
+    weight_mode = cfg.reweighting.get("weight_mode", "sampler")
+    print(f"Weight mode: {weight_mode}")
+
     print("Building topk similarity matrix...")
     topk_matrix = build_topk_matrix(train_embs, guide_embs, cfg)
 
     sample_weights = np.ones(len(ds_tokenized["train"]))
-    train_sampler = WeightedRandomSampler(
-        weights=sample_weights,
-        num_samples=len(sample_weights),
-        replacement=True,
-    )
-    train_loader = _build_dataloader(ds_tokenized["train"], cfg.training.batch_size, sampler=train_sampler)
+
+    if weight_mode == "loss":
+        train_loader = _build_dataloader(ds_tokenized["train"], cfg.training.batch_size, shuffle=True)
+        sample_weights_tensor = torch.from_numpy(sample_weights).float().to(device)
+    else:
+        train_sampler = WeightedRandomSampler(
+            weights=sample_weights,
+            num_samples=len(sample_weights),
+            replacement=True,
+        )
+        train_loader = _build_dataloader(ds_tokenized["train"], cfg.training.batch_size, sampler=train_sampler)
     guide_loader = _build_dataloader(ds_tokenized["guide"], cfg.training.batch_size)
     test_quick_loader = _build_dataloader(ds_tokenized["test_quick"], cfg.training.batch_size)
     test_full_loader = _build_dataloader(ds_tokenized["test"], cfg.training.batch_size)
@@ -139,6 +147,7 @@ def train(cfg, model, tokenizer, ds_tokenized, train_embs, guide_embs, device, d
             scheme = cfg.reweighting.scheme
             kwargs = OmegaConf.to_container(cfg.reweighting, resolve=True)
             kwargs.pop("scheme")
+            kwargs.pop("weight_mode", None)
             sample_weights = compute_sample_weights(topk_matrix, guide_losses, scheme, **kwargs)
 
             w_stats = get_weight_stats(sample_weights)
@@ -159,8 +168,11 @@ def train(cfg, model, tokenizer, ds_tokenized, train_embs, guide_embs, device, d
             umap_idx = np.random.choice(len(train_embs), min(UMAP_SUBSAMPLE, len(train_embs)), replace=False)
             plot_weight_umap(train_embs[umap_idx], sample_weights[umap_idx], guide_embs, guide_losses, epoch, run_name)
 
-            train_sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
-            train_loader = _build_dataloader(ds_tokenized["train"], cfg.training.batch_size, sampler=train_sampler)
+            if weight_mode == "loss":
+                sample_weights_tensor = torch.from_numpy(sample_weights).float().to(device)
+            else:
+                train_sampler = WeightedRandomSampler(weights=sample_weights, num_samples=len(sample_weights), replacement=True)
+                train_loader = _build_dataloader(ds_tokenized["train"], cfg.training.batch_size, sampler=train_sampler)
 
         model.train()
         total_loss = 0
@@ -173,7 +185,15 @@ def train(cfg, model, tokenizer, ds_tokenized, train_embs, guide_embs, device, d
             optimizer.zero_grad()
             outputs = model(input_ids=input_ids, attention_mask=attention_mask)
             preds = outputs.logits.squeeze(-1).to(dtype)
-            loss = loss_fn(preds, labels)
+
+            if weight_mode == "loss" and epoch > 0:
+                idx = batch["sample_idx"].to(device)
+                w = sample_weights_tensor[idx]
+                per_sample_loss = (preds - labels) ** 2
+                loss = (per_sample_loss * w).mean()
+            else:
+                loss = loss_fn(preds, labels)
+
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), cfg.training.grad_clip)
             optimizer.step()

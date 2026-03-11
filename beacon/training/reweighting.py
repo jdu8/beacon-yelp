@@ -68,7 +68,12 @@ def compute_sample_weights(
     else:
         raw_weights = np.ones(n_train)
 
-    return raw_weights / raw_weights.sum() * n_train
+    # Skip sum-normalization when weights can be negative (loss-weighted mode)
+    weight_sum = raw_weights.sum()
+    if weight_sum > 0:
+        raw_weights = raw_weights / weight_sum * n_train
+
+    return raw_weights
 
 
 def get_weight_stats(sample_weights: np.ndarray) -> dict:
