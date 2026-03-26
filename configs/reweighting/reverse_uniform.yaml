@@ -1,0 +1,7 @@
+scheme: minmax
+direction: reverse
+reverse_mode: uniform
+k: 50
+w_min: 0.5
+w_max: 2.0
+weight_mode: sampler

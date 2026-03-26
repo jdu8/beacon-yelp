@@ -78,8 +78,13 @@ def train(cfg, model, tokenizer, ds_tokenized, train_embs, guide_embs, device, d
     weight_mode = cfg.reweighting.get("weight_mode", "sampler")
     print(f"Weight mode: {weight_mode}")
 
-    print("Building topk similarity matrix...")
-    topk_matrix = build_topk_matrix(train_embs, guide_embs, cfg)
+    direction = cfg.reweighting.get("direction", "forward")
+    print(f"Building topk similarity matrix (direction={direction})...")
+    if direction == "reverse":
+        from beacon.data.embeddings import build_reverse_topk_matrix
+        topk_matrix = build_reverse_topk_matrix(train_embs, guide_embs, cfg)
+    else:
+        topk_matrix = build_topk_matrix(train_embs, guide_embs, cfg)
 
     sample_weights = np.ones(len(ds_tokenized["train"]))
 
